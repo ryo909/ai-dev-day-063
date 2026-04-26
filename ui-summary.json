@@ -1,0 +1,11 @@
+{
+  "title": "引き落とし底割れ見通し",
+  "archetype": "balance_timeline",
+  "interaction_model": "structured_multi_field",
+  "primary_layout": "two_column_workbench",
+  "result_presentation_style": "stacked_result_cards",
+  "palette_motif": "neutral slate / white",
+  "main_cta": "サンプルで試す",
+  "intro_variant": "generic",
+  "ui_variant": "generic"
+}

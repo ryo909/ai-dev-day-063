@@ -1,42 +1,40 @@
-# ai-dev-exp-template
+# Day063 — 引き落とし底割れ見通し
 
-Vite-based single-page template for `ai-dev-day-XXX` repositories.
+> 引き落としで不足しそうな日を見つけやすくするためのツールです。
+>
+> Complexity Tier: medium
+>
+> Selected Components: none
+>
+> Family / Mechanic: autodebit_floor_forecast / balance_timeline
+>
+> Input -> Output: cashflow_rows -> risk_timeline
+>
+> Audience Promise: 危ない日を前もって把握できる。
 
-## Required meta.json fields
+## 使い方
 
-- `day` (e.g. `Day001`)
-- `title`
-- `description`
-- `genre`
-- `theme`
-- `story_summary`
+このツールでできること
+引き落としで不足しそうな日を見つけやすくするためのツールです。
 
-## Theme behavior
+こんな時に使います
+給料日前にどの日が危ないか読めない時に使います。
 
-- `src/themes.js` defines 8 visual themes.
-- Runtime applies `meta.json.theme` using CSS variables.
-- Day repos should set `theme` with a day-seeded deterministic selector.
+使い方
+1. 残高を入れる
+2. 予定を足す
+3. 危ない日を見る
 
-## Component Packs (tiered build)
+## Story
 
-- Template reads `complexity_tier` / `selected_components` from `meta.json`.
-- `selected_components` is missing: runs as small tier baseline with all packs OFF.
-- Unknown component names are ignored safely.
-- Each pack can be toggled independently and app core flow still works.
+- [制作ストーリー](./STORY.md)
+- Complexity hint: Implement the locked brief with one clear hero interaction and keep the main screenshot readable.
+- Publish hook: 入出金予定を自分で足すと、底割れしそうな日と先に減らす候補が一つのタイムラインで見える。
 
-Supported packs:
+## Demo
 
-- `reason_panel`
-- `sample_inputs`
-- `local_storage`
-- `comparison_view`
-- `history_panel`
-- `export_suite`
-- `step_ui`
+🌐 [GitHub Pages](https://ryo909.github.io/ai-dev-day-063/)
 
-### Quality/Fallback integration
+---
 
-- Every pack root includes `data-quality-marker="<pack_name>"` for evaluator detection.
-- Runtime manifest is published to `window.__COMPONENT_PACKS__` and script node `#componentPackManifest`.
-- Static fallback manifest exists at `public/component-pack-manifest.json`.
-- Medium/Large can increase visual depth safely by selecting more packs without changing core logic.
+Day063 / #100日開発
