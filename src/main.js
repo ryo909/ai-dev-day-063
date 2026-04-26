@@ -1,5 +1,5 @@
 import './style.css';
-const PROFILE = {"day":"Day063","title":"Auto Debit Floor Forecaster","display_name_ja":"引き落とし底割れ見通し","one_sentence":"残高と引き落とし予定から不足しそうな日を先回りで見つけるツール","purpose_line_ja":"引き落としで不足しそうな日を見つけやすくするためのツールです。","use_case_line_ja":"給料日前にどの日が危ないか読めない時に使います。","how_it_works_line_ja":"入出金予定を入れると、不足予兆つきの残高推移が分かります。","core_action":"simulate","family":"autodebit_floor_forecast","mechanic":"balance_timeline","input_style":"cashflow_rows","output_style":"risk_timeline","output_label":"ここを見ればOKです","audience_promise":"危ない日を前もって把握できる。","publish_hook":"入出金予定を自分で足すと、底割れしそうな日と先に減らす候補が一つのタイムラインで見える。","engine":"brief_driven","interaction_archetype":"balance_timeline","page_archetype":"balance_bars","ui_variant":"generic","intro_variant":"generic","interaction_model":"structured_multi_field","primary_layout":"two_column_workbench","result_presentation_style":"stacked_result_cards","palette_motif":"neutral slate / white","main_cta":"サンプルで試す","input_panel_title":"まず試す入力","sample_panel_title":"サンプルで試す","guide_panel_title":"使い方のコツ","hero_panel_label":"結果の見どころ","output_shape":"balance_bars","state_model":"balance_timeline_state","core_loop":"cashflow_rows -> balance_timeline -> risk_timeline","component_pack":"balance_bars+risk_timeline","scaffold_id":"card_deck_board","single_shot_text_generator":false};
+const PROFILE = {"day":"Day063","title":"Auto Debit Floor Forecaster","display_name_ja":"引き落とし底割れ見通し","one_sentence":"残高と引き落とし予定から不足しそうな日を先回りで見つけるツール","purpose_line_ja":"引き落としで不足しそうな日を見つけやすくするためのツールです。","use_case_line_ja":"給料日前にどの日が危ないか読めない時に使います。","how_it_works_line_ja":"入出金予定を入れると、不足予兆つきの残高推移が分かります。","core_action":"simulate","family":"autodebit_floor_forecast","mechanic":"balance_timeline","input_style":"cashflow_rows","output_style":"risk_timeline","output_label":"ここを見ればOKです","audience_promise":"危ない日を前もって把握できる。","publish_hook":"入出金予定を自分で足すと、底割れしそうな日と先に減らす候補が一つのタイムラインで見える。","engine":"brief_driven","interaction_archetype":"balance_timeline","page_archetype":"balance_bars","ui_variant":"cashflow","intro_variant":"cashflow_alert","interaction_model":"edit_cashflow_rows_on_timeline","primary_layout":"starting_balance_with_risk_timeline","result_presentation_style":"running_balance_and_risk_rows","palette_motif":"残高アラートレッド","main_cta":"給料日前の残高で試す","input_panel_title":"残高と予定を足す","sample_panel_title":"給料日前の残高で試す","guide_panel_title":"危ない日の見どころ","hero_panel_label":"底割れしそうな日","output_shape":"balance_bars","state_model":"balance_timeline_state","core_loop":"cashflow_rows -> balance_timeline -> risk_timeline","component_pack":"balance_bars+risk_timeline","scaffold_id":"brief_canvas","single_shot_text_generator":false};
 const byId = (id) => document.getElementById(id);
 const state = {
   tokens: ['買う', '待つ', '比べる', '今週中'],
@@ -564,6 +564,34 @@ function setupBriefCanvas() {
   }
   if (key === 'swap_compare') {
     setupToneBalance(root);
+    return;
+  }
+  if (key === 'combo_filter') {
+    setupFridgeRescue(root);
+    return;
+  }
+  if (key === 'diff_grid') {
+    setupQuoteWatcher(root);
+    return;
+  }
+  if (key === 'tone_slider') {
+    setupReminderTone(root);
+    return;
+  }
+  if (key === 'fit_pack') {
+    setupGapChore(root);
+    return;
+  }
+  if (key === 'coverage_assign') {
+    setupGiftOverlap(root);
+    return;
+  }
+  if (key === 'balance_timeline') {
+    setupCashfloor(root);
+    return;
+  }
+  if (key === 'layout_fit') {
+    setupTempSpace(root);
     return;
   }
 
@@ -1800,6 +1828,917 @@ function setupToneBalance(root) {
   });
   mountPresetButtons([{ label: '仕事の依頼を断る', action: () => { model = clone(presets['仕事の依頼を断る']); tone = 2; byId('toneRange').value = '2'; render(); } }]);
   state.helpers.runBriefSample = () => { model = clone(presets['仕事の依頼を断る']); tone = 2; byId('toneRange').value = '2'; render(); };
+  render();
+}
+
+function setupFridgeRescue(root) {
+  const presets = {
+    '冷蔵庫の夕飯': {
+      ingredients: [
+        { name: '卵', days: 1 },
+        { name: 'ベーコン', days: 2 },
+        { name: 'チーズ', days: 4 },
+        { name: 'トマト', days: 2 }
+      ],
+      meals: [
+        { name: 'カルボナーラ風うどん', needs: '卵, ベーコン, チーズ' },
+        { name: 'トマトオムレツ', needs: '卵, トマト, チーズ' },
+        { name: 'ベーコンエッグ丼', needs: '卵, ベーコン' }
+      ]
+    }
+  };
+  let model = clone(presets['冷蔵庫の夕飯']);
+
+  root.querySelector('#briefInputZone').innerHTML = `
+    <div class="row-stack" id="ingredientRows"></div>
+    <div class="inline-fields">
+      <input id="newIngredientName" class="text-input" placeholder="食材名">
+      <input id="newIngredientDays" class="money-input" type="number" min="0" value="2">
+      <button id="addIngredientBtn" class="secondary-btn">食材を追加</button>
+    </div>
+    <div class="row-stack" id="mealRows"></div>
+    <div class="inline-fields--wide">
+      <input id="newMealName" class="text-input" placeholder="候補名">
+      <input id="newMealNeeds" class="text-input" placeholder="必要食材をカンマ区切り">
+      <div class="subline">例: 卵, ベーコン</div>
+      <button id="addMealBtn" class="secondary-btn">候補を追加</button>
+    </div>
+  `;
+  root.querySelector('#briefResultZone').innerHTML = `
+    <div class="detail-row">
+      <section class="sample-card">
+        <h2>先に使う食材</h2>
+        <div class="row-stack" id="urgentIngredientList"></div>
+      </section>
+      <section class="legend-card">
+        <h2>今夜作れる候補</h2>
+        <div class="listing-grid" id="fridgeMealList"></div>
+      </section>
+    </div>
+  `;
+  setResultHint('残り日数や食材名を書き換えると、先に使う食材と作れる候補がすぐ入れ替わります。');
+
+  function normalizedIngredients() {
+    return model.ingredients
+      .map((item) => ({ name: (item.name || '').trim(), days: Number(item.days || 0) }))
+      .filter((item) => item.name);
+  }
+
+  function normalizedMeals() {
+    return model.meals
+      .map((item) => ({
+        name: (item.name || '').trim(),
+        needs: String(item.needs || '').split(',').map((token) => token.trim()).filter(Boolean)
+      }))
+      .filter((item) => item.name && item.needs.length);
+  }
+
+  function render() {
+    const ingredientRows = byId('ingredientRows');
+    ingredientRows.innerHTML = normalizedIngredients().map((item, idx) => `
+      <div class="row-card inline-fields">
+        <input class="text-input" data-ing-name="${idx}" value="${escapeHtml(item.name)}">
+        <input class="money-input" data-ing-days="${idx}" type="number" min="0" value="${item.days}">
+        <button class="assign-btn" data-ing-remove="${idx}">削除</button>
+      </div>
+    `).join('') || '<div class="empty-state">食材を足すと、先に使う物がここから見えます。</div>';
+    normalizedIngredients().forEach((item, idx) => {
+      ingredientRows.querySelector(`[data-ing-name="${idx}"]`)?.addEventListener('input', (e) => {
+        model.ingredients[idx].name = e.target.value;
+        render();
+      });
+      ingredientRows.querySelector(`[data-ing-days="${idx}"]`)?.addEventListener('input', (e) => {
+        model.ingredients[idx].days = Number(e.target.value || 0);
+        render();
+      });
+      ingredientRows.querySelector(`[data-ing-remove="${idx}"]`)?.addEventListener('click', () => {
+        model.ingredients.splice(idx, 1);
+        render();
+      });
+    });
+
+    const mealRows = byId('mealRows');
+    mealRows.innerHTML = normalizedMeals().map((meal, idx) => `
+      <div class="row-card inline-fields--wide">
+        <input class="text-input" data-meal-name="${idx}" value="${escapeHtml(meal.name)}">
+        <input class="text-input" data-meal-needs="${idx}" value="${escapeHtml(meal.needs.join(', '))}">
+        <div class="subline">${escapeHtml(meal.needs.length)}食材で成立</div>
+        <button class="assign-btn" data-meal-remove="${idx}">削除</button>
+      </div>
+    `).join('') || '<div class="empty-state">候補を足すと、今夜作れる物だけが残ります。</div>';
+    normalizedMeals().forEach((meal, idx) => {
+      mealRows.querySelector(`[data-meal-name="${idx}"]`)?.addEventListener('input', (e) => {
+        model.meals[idx].name = e.target.value;
+        render();
+      });
+      mealRows.querySelector(`[data-meal-needs="${idx}"]`)?.addEventListener('input', (e) => {
+        model.meals[idx].needs = e.target.value;
+        render();
+      });
+      mealRows.querySelector(`[data-meal-remove="${idx}"]`)?.addEventListener('click', () => {
+        model.meals.splice(idx, 1);
+        render();
+      });
+    });
+
+    const ingredients = normalizedIngredients();
+    const ingredientMap = Object.fromEntries(ingredients.map((item) => [item.name, item.days]));
+    const urgent = [...ingredients].sort((a, b) => a.days - b.days).slice(0, 3);
+    const meals = normalizedMeals()
+      .map((meal) => {
+        const missing = meal.needs.filter((need) => ingredientMap[need] == null);
+        const priority = Math.min(...meal.needs.map((need) => ingredientMap[need] ?? 999));
+        const urgentNeed = meal.needs.slice().sort((a, b) => (ingredientMap[a] ?? 999) - (ingredientMap[b] ?? 999))[0] || '';
+        return { ...meal, missing, priority, urgentNeed };
+      })
+      .filter((meal) => meal.missing.length === 0)
+      .sort((a, b) => a.priority - b.priority);
+
+    byId('urgentIngredientList').innerHTML = urgent.length
+      ? urgent.map((item) => `<div class="warning-card"><strong>${escapeHtml(item.name)}</strong><div class="subline">残り ${item.days}日</div></div>`).join('')
+      : '<div class="empty-state">食材を足すと優先順が出ます。</div>';
+    byId('fridgeMealList').innerHTML = meals.length
+      ? meals.map((meal) => `<div class="listing-card"><div class="listing-title">${escapeHtml(meal.name)}</div><div class="subline">先に使う: ${escapeHtml(meal.urgentNeed)} / 材料: ${escapeHtml(meal.needs.join('・'))}</div></div>`).join('')
+      : '<div class="empty-state">足りる材料の候補だけがここに残ります。</div>';
+
+    setHeroStat(urgent[0] ? `${urgent[0].name} ${urgent[0].days}日` : '未入力');
+    setStatusCards([
+      { label: '先に使う食材', value: `${Math.min(urgent.length, ingredients.length)}つ` },
+      { label: '作れる候補', value: `${meals.length}品` },
+      { label: '不足食材', value: `${Math.max(0, normalizedMeals().length - meals.length)}品分` }
+    ]);
+    setResultLead(meals.length ? '先に使う食材と今夜作れる候補が同時に見えるので、検索より早く決まります。' : '材料が足りる候補がないので、候補名や食材を少し足すと復活します。');
+  }
+
+  byId('addIngredientBtn').addEventListener('click', () => {
+    const name = (byId('newIngredientName').value || '').trim();
+    if (!name) return;
+    model.ingredients.push({ name, days: Number(byId('newIngredientDays').value || 0) });
+    byId('newIngredientName').value = '';
+    byId('newIngredientDays').value = '2';
+    render();
+  });
+  byId('addMealBtn').addEventListener('click', () => {
+    const name = (byId('newMealName').value || '').trim();
+    const needs = (byId('newMealNeeds').value || '').trim();
+    if (!name || !needs) return;
+    model.meals.push({ name, needs });
+    byId('newMealName').value = '';
+    byId('newMealNeeds').value = '';
+    render();
+  });
+
+  mountPresetButtons([{ label: '冷蔵庫の夕飯', action: () => { model = clone(presets['冷蔵庫の夕飯']); render(); } }]);
+  state.helpers.runBriefSample = () => { model = clone(presets['冷蔵庫の夕飯']); render(); };
+  render();
+}
+
+function setupQuoteWatcher(root) {
+  const presets = {
+    '3社見積もり': {
+      vendors: ['A社', 'B社', 'C社'],
+      rows: [
+        { label: '初期費用', values: ['120000', '110000', '120000'] },
+        { label: '設置費', values: ['込み', '', '別料金'] },
+        { label: '月額保守', values: ['18000', '19000', '18000'] },
+        { label: '解約手数料', values: ['あり', 'あり', 'なし'] }
+      ]
+    }
+  };
+  let model = clone(presets['3社見積もり']);
+
+  root.querySelector('#briefInputZone').innerHTML = `
+    <div class="mini-grid">
+      <input id="vendorA" class="text-input" placeholder="会社名A">
+      <input id="vendorB" class="text-input" placeholder="会社名B">
+      <input id="vendorC" class="text-input" placeholder="会社名C">
+    </div>
+    <div class="quote-grid">
+      <div class="quote-header"><span>項目</span><span id="vendorAHead"></span><span id="vendorBHead"></span><span id="vendorCHead"></span><span>操作</span></div>
+      <div id="quoteRows"></div>
+    </div>
+    <div class="quote-row">
+      <input id="newQuoteLabel" class="text-input" placeholder="条件項目">
+      <input id="newQuoteA" class="text-input" placeholder="A社">
+      <input id="newQuoteB" class="text-input" placeholder="B社">
+      <input id="newQuoteC" class="text-input" placeholder="C社">
+      <button id="addQuoteRowBtn" class="secondary-btn">行を追加</button>
+    </div>
+  `;
+  root.querySelector('#briefResultZone').innerHTML = `
+    <div class="detail-row">
+      <section class="sample-card">
+        <h2>要確認の前提</h2>
+        <div class="warning-list" id="quoteAlertList"></div>
+      </section>
+      <section class="legend-card">
+        <h2>聞き返しメモ</h2>
+        <div class="row-stack" id="quoteQuestionList"></div>
+      </section>
+    </div>
+  `;
+  setResultHint('空欄や表現差がある行だけが浮くので、金額順より先に確認ポイントが見えます。');
+
+  function syncVendorHeads() {
+    ['A', 'B', 'C'].forEach((key, idx) => {
+      const value = model.vendors[idx] || `${key}社`;
+      byId(`vendor${key}`).value = value;
+      byId(`vendor${key}Head`).textContent = value;
+    });
+  }
+
+  function render() {
+    syncVendorHeads();
+    const rowsWrap = byId('quoteRows');
+    rowsWrap.innerHTML = model.rows.map((row, idx) => {
+      const values = row.values.map((value) => (value || '').trim());
+      const unique = [...new Set(values.filter(Boolean))];
+      const hasGap = values.some((value) => !value) || unique.length > 1;
+      return `<div class="quote-row row-card ${hasGap ? 'quote-row--alert' : ''}">
+        <input class="text-input" data-quote-label="${idx}" value="${escapeHtml(row.label)}">
+        <input class="text-input" data-quote-value="${idx}-0" value="${escapeHtml(values[0] || '')}">
+        <input class="text-input" data-quote-value="${idx}-1" value="${escapeHtml(values[1] || '')}">
+        <input class="text-input" data-quote-value="${idx}-2" value="${escapeHtml(values[2] || '')}">
+        <button class="assign-btn" data-quote-remove="${idx}">削除</button>
+      </div>`;
+    }).join('') || '<div class="empty-state">条件行を足すと、差のある所だけがここに出ます。</div>';
+
+    model.rows.forEach((row, idx) => {
+      rowsWrap.querySelector(`[data-quote-label="${idx}"]`)?.addEventListener('input', (e) => {
+        model.rows[idx].label = e.target.value;
+        render();
+      });
+      [0, 1, 2].forEach((col) => {
+        rowsWrap.querySelector(`[data-quote-value="${idx}-${col}"]`)?.addEventListener('input', (e) => {
+          model.rows[idx].values[col] = e.target.value;
+          render();
+        });
+      });
+      rowsWrap.querySelector(`[data-quote-remove="${idx}"]`)?.addEventListener('click', () => {
+        model.rows.splice(idx, 1);
+        render();
+      });
+    });
+
+    const alerts = model.rows.map((row) => {
+      const values = row.values.map((value) => (value || '').trim());
+      const unique = [...new Set(values.filter(Boolean))];
+      const missingAt = values.map((value, idx) => (!value ? model.vendors[idx] : null)).filter(Boolean);
+      const diff = unique.length > 1;
+      return {
+        label: row.label,
+        diff,
+        missingAt,
+        values
+      };
+    }).filter((item) => item.diff || item.missingAt.length);
+
+    byId('quoteAlertList').innerHTML = alerts.length
+      ? alerts.map((item) => `<div class="warning-card"><strong>${escapeHtml(item.label)}</strong><div class="subline">${item.missingAt.length ? `未記載: ${escapeHtml(item.missingAt.join(' / '))}` : '表現差あり'}</div></div>`).join('')
+      : '<div class="empty-state">要確認の差分はありません。</div>';
+    byId('quoteQuestionList').innerHTML = alerts.length
+      ? alerts.map((item) => `<div class="row-card"><strong>${escapeHtml(item.label)}</strong><div class="subline">${escapeHtml(item.missingAt.length ? `${item.missingAt.join(' / ')} はこの条件が含まれるか確認する` : 'この項目は同じ条件か、別料金かを確認する')}</div></div>`).join('')
+      : '<div class="empty-state">このまま比較を進められます。</div>';
+
+    setHeroStat(`${alerts.length}行`);
+    setStatusCards([
+      { label: '要確認', value: `${alerts.length}行` },
+      { label: '未記載', value: `${alerts.filter((item) => item.missingAt.length).length}行` },
+      { label: '表現差', value: `${alerts.filter((item) => item.diff).length}行` }
+    ]);
+    setResultLead(alerts.length ? '未記載や別表現の行だけが残るので、価格差より先に聞くべき所が見えます。' : 'いまの条件なら、大きな前提差は見えていません。');
+  }
+
+  ['A', 'B', 'C'].forEach((key, idx) => {
+    byId(`vendor${key}`).addEventListener('input', (e) => {
+      model.vendors[idx] = e.target.value || `${key}社`;
+      render();
+    });
+  });
+  byId('addQuoteRowBtn').addEventListener('click', () => {
+    const label = (byId('newQuoteLabel').value || '').trim();
+    if (!label) return;
+    model.rows.push({
+      label,
+      values: [byId('newQuoteA').value || '', byId('newQuoteB').value || '', byId('newQuoteC').value || '']
+    });
+    ['newQuoteLabel', 'newQuoteA', 'newQuoteB', 'newQuoteC'].forEach((id) => { byId(id).value = ''; });
+    render();
+  });
+
+  mountPresetButtons([{ label: '3社見積もり', action: () => { model = clone(presets['3社見積もり']); render(); } }]);
+  state.helpers.runBriefSample = () => { model = clone(presets['3社見積もり']); render(); };
+  render();
+}
+
+function setupReminderTone(root) {
+  const presets = {
+    '返信が止まった相手': {
+      recipient: '取引先の佐藤さん',
+      purpose: '見積もり確認',
+      deadline: '明日17:00',
+      lastSent: '3日前',
+      points: ['金額の確定', '返信期限の共有']
+    }
+  };
+  let model = clone(presets['返信が止まった相手']);
+  let tone = 2;
+
+  root.querySelector('#briefInputZone').innerHTML = `
+    <div class="mini-grid">
+      <input id="toneRecipient" class="text-input" placeholder="相手">
+      <input id="tonePurpose" class="text-input" placeholder="目的">
+      <input id="toneDeadline" class="text-input" placeholder="期限">
+      <input id="toneLastSent" class="text-input" placeholder="前回送信">
+    </div>
+    <label>催促の強さ <input id="toneLevelRange" type="range" min="1" max="3" value="2"></label>
+    <div class="row-stack" id="tonePointRows"></div>
+    <div class="inline-fields">
+      <input id="newTonePoint" class="text-input" placeholder="入れたい要点">
+      <div class="subline">例: 返信期限</div>
+      <button id="addTonePointBtn" class="secondary-btn">要点を追加</button>
+    </div>
+  `;
+  root.querySelector('#briefResultZone').innerHTML = `
+    <div class="tag-row" id="toneMissingTags"></div>
+    <div class="variant-grid" id="toneVariantGrid"></div>
+  `;
+  setResultHint('相手や期限を書き換えると、3段階の文案と不足タグが同時に変わります。');
+
+  function bindModelInputs() {
+    [['toneRecipient', 'recipient'], ['tonePurpose', 'purpose'], ['toneDeadline', 'deadline'], ['toneLastSent', 'lastSent']].forEach(([id, key]) => {
+      byId(id).value = model[key] || '';
+      byId(id).addEventListener('input', (e) => {
+        model[key] = e.target.value;
+        render();
+      });
+    });
+  }
+
+  function toneTexts() {
+    const base = {
+      soft: `${model.recipient}、${model.purpose}の件でご状況だけでも伺えたら助かります。${model.deadline ? `${model.deadline}までに一言いただけると安心です。` : ''}`,
+      mid: `${model.recipient}、${model.purpose}について確認したくご連絡しました。${model.deadline ? `${model.deadline}までにご返信いただけると進めやすいです。` : 'ご確認のうえご返信をお願いします。'}`,
+      strong: `${model.recipient}、${model.purpose}の進行上、${model.deadline || '今週中'}までにご返信をお願いできますでしょうか。難しい場合はその旨だけでも共有いただけると助かります。`
+    };
+    const pointLine = model.points.filter(Boolean).length ? ` 要点: ${model.points.filter(Boolean).join(' / ')}` : '';
+    return [base.soft + pointLine, base.mid + pointLine, base.strong + pointLine];
+  }
+
+  function render() {
+    const pointRows = byId('tonePointRows');
+    pointRows.innerHTML = model.points.length
+      ? model.points.map((point, idx) => `
+          <div class="row-card inline-fields">
+            <input class="text-input" data-tone-point="${idx}" value="${escapeHtml(point)}">
+            <div class="subline">本文へ反映</div>
+            <button class="assign-btn" data-tone-remove="${idx}">削除</button>
+          </div>
+        `).join('')
+      : '<div class="empty-state">入れたい要点を足すと、不足タグと文案に反映されます。</div>';
+    model.points.forEach((point, idx) => {
+      pointRows.querySelector(`[data-tone-point="${idx}"]`)?.addEventListener('input', (e) => {
+        model.points[idx] = e.target.value;
+        render();
+      });
+      pointRows.querySelector(`[data-tone-remove="${idx}"]`)?.addEventListener('click', () => {
+        model.points.splice(idx, 1);
+        render();
+      });
+    });
+
+    const missing = [];
+    if (!(model.deadline || '').trim()) missing.push('期限がまだ空です');
+    if (!(model.lastSent || '').trim()) missing.push('前回送信がまだ空です');
+    if (!model.points.filter(Boolean).length) missing.push('要点がまだ1つもありません');
+    byId('toneMissingTags').innerHTML = missing.length
+      ? missing.map((item) => `<span class="alert-tag">${escapeHtml(item)}</span>`).join('')
+      : '<span class="preview-token">不足情報なし</span>';
+
+    const texts = toneTexts();
+    const labels = ['やわらかめ', '標準', '強め'];
+    byId('toneVariantGrid').innerHTML = texts.map((text, idx) => `
+      <div class="variant-card ${idx === tone - 1 ? 'active' : ''}">
+        <strong>${labels[idx]}</strong>
+        <textarea class="text-input" rows="6" data-tone-variant="${idx}">${escapeHtml(text)}</textarea>
+      </div>
+    `).join('');
+    byId('toneVariantGrid').querySelectorAll('[data-tone-variant]').forEach((field) => {
+      field.addEventListener('input', () => {
+        // editable output is intentionally user-owned; keep current text in place
+      });
+    });
+
+    setHeroStat(labels[tone - 1]);
+    setStatusCards([
+      { label: 'いまの温度', value: labels[tone - 1] },
+      { label: '不足情報', value: `${missing.length}件` },
+      { label: '要点', value: `${model.points.filter(Boolean).length}件` }
+    ]);
+    setResultLead(missing.length ? '不足情報タグが残るので、送る前に足りない所だけ埋められます。' : '3段階の文案を見比べながら、そのまま送れる温度を選べます。');
+  }
+
+  bindModelInputs();
+  byId('toneLevelRange').addEventListener('input', (e) => {
+    tone = Number(e.target.value || 2);
+    render();
+  });
+  byId('addTonePointBtn').addEventListener('click', () => {
+    const point = (byId('newTonePoint').value || '').trim();
+    if (!point) return;
+    model.points.push(point);
+    byId('newTonePoint').value = '';
+    render();
+  });
+
+  mountPresetButtons([{ label: '返信が止まった相手', action: () => { model = clone(presets['返信が止まった相手']); tone = 2; byId('toneLevelRange').value = '2'; bindModelInputs(); render(); } }]);
+  state.helpers.runBriefSample = () => { model = clone(presets['返信が止まった相手']); tone = 2; byId('toneLevelRange').value = '2'; bindModelInputs(); render(); };
+  render();
+}
+
+function setupGapChore(root) {
+  const presets = {
+    '18分の空き時間': {
+      minutes: 18,
+      chores: [
+        { name: 'ゴミ集め', minutes: 5, place: '玄関' },
+        { name: '食器片づけ', minutes: 7, place: 'キッチン' },
+        { name: '洗面台を拭く', minutes: 4, place: '洗面所' },
+        { name: '洗濯物をたたむ', minutes: 12, place: 'リビング' }
+      ]
+    }
+  };
+  let model = clone(presets['18分の空き時間']);
+
+  root.querySelector('#briefInputZone').innerHTML = `
+    <div class="inline-fields">
+      <input id="gapMinutes" class="money-input" type="number" min="1" value="18">
+      <div class="subline">使える分数</div>
+      <span></span>
+    </div>
+    <div class="row-stack" id="gapChoreRows"></div>
+    <div class="inline-fields--wide">
+      <input id="newGapChoreName" class="text-input" placeholder="家事名">
+      <input id="newGapChoreMinutes" class="money-input" type="number" min="1" value="5">
+      <input id="newGapChorePlace" class="text-input" placeholder="場所">
+      <button id="addGapChoreBtn" class="secondary-btn">家事を追加</button>
+    </div>
+  `;
+  root.querySelector('#briefResultZone').innerHTML = `
+    <div class="detail-row">
+      <section class="sample-card"><h2>今入る家事</h2><div class="row-stack" id="gapFitList"></div></section>
+      <section class="legend-card"><h2>あとで回す家事</h2><div class="row-stack" id="gapOverflowList"></div></section>
+    </div>
+  `;
+  setResultHint('使える分数を変えると、今入る家事とあふれる家事がその場で分かれます。');
+
+  function render() {
+    byId('gapMinutes').value = model.minutes;
+    const rows = byId('gapChoreRows');
+    rows.innerHTML = model.chores.length
+      ? model.chores.map((chore, idx) => `
+          <div class="row-card inline-fields--wide">
+            <input class="text-input" data-gap-name="${idx}" value="${escapeHtml(chore.name)}">
+            <input class="money-input" data-gap-minutes="${idx}" type="number" min="1" value="${Number(chore.minutes || 0)}">
+            <input class="text-input" data-gap-place="${idx}" value="${escapeHtml(chore.place || '')}">
+            <button class="assign-btn" data-gap-remove="${idx}">削除</button>
+          </div>
+        `).join('')
+      : '<div class="empty-state">家事を足すと、今入る組み合わせがここから作れます。</div>';
+
+    model.chores.forEach((chore, idx) => {
+      rows.querySelector(`[data-gap-name="${idx}"]`)?.addEventListener('input', (e) => { model.chores[idx].name = e.target.value; render(); });
+      rows.querySelector(`[data-gap-minutes="${idx}"]`)?.addEventListener('input', (e) => { model.chores[idx].minutes = Number(e.target.value || 0); render(); });
+      rows.querySelector(`[data-gap-place="${idx}"]`)?.addEventListener('input', (e) => { model.chores[idx].place = e.target.value; render(); });
+      rows.querySelector(`[data-gap-remove="${idx}"]`)?.addEventListener('click', () => { model.chores.splice(idx, 1); render(); });
+    });
+
+    const sorted = model.chores
+      .map((chore) => ({ ...chore, minutes: Number(chore.minutes || 0) }))
+      .filter((chore) => (chore.name || '').trim() && chore.minutes > 0)
+      .sort((a, b) => a.minutes - b.minutes);
+    let used = 0;
+    const fit = [];
+    const overflow = [];
+    sorted.forEach((chore) => {
+      if (used + chore.minutes <= Number(model.minutes || 0)) {
+        fit.push(chore);
+        used += chore.minutes;
+      } else {
+        overflow.push(chore);
+      }
+    });
+
+    byId('gapFitList').innerHTML = fit.length
+      ? fit.map((chore) => `<div class="row-card"><strong>${escapeHtml(chore.name)}</strong><div class="subline">${chore.minutes}分 / ${escapeHtml(chore.place)}</div></div>`).join('')
+      : '<div class="empty-state">まだ入る家事がありません。</div>';
+    byId('gapOverflowList').innerHTML = overflow.length
+      ? overflow.map((chore) => `<div class="warning-card"><strong>${escapeHtml(chore.name)}</strong><div class="subline">${chore.minutes}分 / ${escapeHtml(chore.place)}</div></div>`).join('')
+      : '<div class="empty-state">あふれる家事はありません。</div>';
+
+    setHeroStat(`${used}分`);
+    setStatusCards([
+      { label: '使える時間', value: `${model.minutes}分` },
+      { label: '今入る家事', value: `${fit.length}件` },
+      { label: 'あとで回す', value: `${overflow.length}件` }
+    ]);
+    setResultLead(fit.length ? '今入る家事だけが上段に残るので、目についた物から始めるより迷いません。' : '使える分数か家事の分数を少し見直すと、入る候補が出ます。');
+  }
+
+  byId('gapMinutes').addEventListener('input', (e) => { model.minutes = Number(e.target.value || 0); render(); });
+  byId('addGapChoreBtn').addEventListener('click', () => {
+    const name = (byId('newGapChoreName').value || '').trim();
+    if (!name) return;
+    model.chores.push({
+      name,
+      minutes: Number(byId('newGapChoreMinutes').value || 0),
+      place: byId('newGapChorePlace').value || ''
+    });
+    ['newGapChoreName', 'newGapChorePlace'].forEach((id) => { byId(id).value = ''; });
+    byId('newGapChoreMinutes').value = '5';
+    render();
+  });
+
+  mountPresetButtons([{ label: '18分の空き時間', action: () => { model = clone(presets['18分の空き時間']); render(); } }]);
+  state.helpers.runBriefSample = () => { model = clone(presets['18分の空き時間']); render(); };
+  render();
+}
+
+function setupGiftOverlap(root) {
+  const presets = {
+    '3人の手土産': {
+      people: [
+        { name: 'Aさん', avoid: '甘い物NG' },
+        { name: 'Bさん', avoid: '要冷蔵は避けたい' },
+        { name: 'Cさん', avoid: '軽い物が良い' }
+      ],
+      gifts: [
+        { name: '焼き菓子', category: '甘い', price: 1800 },
+        { name: 'お茶', category: '常温', price: 1500 },
+        { name: 'ジャム', category: '瓶もの', price: 2200 },
+        { name: 'チョコ', category: '甘い', price: 1700 }
+      ]
+    }
+  };
+  let model = clone(presets['3人の手土産']);
+
+  root.querySelector('#briefInputZone').innerHTML = `
+    <div class="row-stack" id="giftPeopleRows"></div>
+    <div class="inline-fields--wide">
+      <input id="newGiftPersonName" class="text-input" placeholder="参加者">
+      <input id="newGiftPersonAvoid" class="text-input" placeholder="避けたい条件">
+      <div class="subline">例: 甘い物NG</div>
+      <button id="addGiftPersonBtn" class="secondary-btn">参加者を追加</button>
+    </div>
+    <div class="row-stack" id="giftItemRows"></div>
+    <div class="inline-fields--wide">
+      <input id="newGiftName" class="text-input" placeholder="候補名">
+      <input id="newGiftCategory" class="text-input" placeholder="カテゴリ">
+      <input id="newGiftPrice" class="money-input" type="number" min="0" value="1500">
+      <button id="addGiftItemBtn" class="secondary-btn">候補を追加</button>
+    </div>
+  `;
+  root.querySelector('#briefResultZone').innerHTML = `
+    <div class="assignment-grid" id="giftAssignmentGrid"></div>
+    <div class="warning-list" id="giftWarningList"></div>
+  `;
+  setResultHint('候補や参加者を書き換えると、担当割り当てとかぶり警告がすぐ入れ替わります。');
+
+  function assignment() {
+    const usedCategories = new Set();
+    return model.people.map((person, idx) => {
+      const avoid = (person.avoid || '').trim();
+      const pick = model.gifts.find((gift) => {
+        if (usedCategories.has(gift.category)) return false;
+        if (avoid && `${gift.name} ${gift.category}`.includes(avoid.replace('NG', '').trim())) return false;
+        return true;
+      }) || null;
+      if (pick) usedCategories.add(pick.category);
+      return { person, pick };
+    });
+  }
+
+  function render() {
+    const peopleRows = byId('giftPeopleRows');
+    peopleRows.innerHTML = model.people.map((person, idx) => `
+      <div class="row-card inline-fields--wide">
+        <input class="text-input" data-person-name="${idx}" value="${escapeHtml(person.name)}">
+        <input class="text-input" data-person-avoid="${idx}" value="${escapeHtml(person.avoid || '')}">
+        <div class="subline">避けたい条件</div>
+        <button class="assign-btn" data-person-remove="${idx}">削除</button>
+      </div>
+    `).join('');
+    model.people.forEach((person, idx) => {
+      peopleRows.querySelector(`[data-person-name="${idx}"]`)?.addEventListener('input', (e) => { model.people[idx].name = e.target.value; render(); });
+      peopleRows.querySelector(`[data-person-avoid="${idx}"]`)?.addEventListener('input', (e) => { model.people[idx].avoid = e.target.value; render(); });
+      peopleRows.querySelector(`[data-person-remove="${idx}"]`)?.addEventListener('click', () => { model.people.splice(idx, 1); render(); });
+    });
+
+    const giftRows = byId('giftItemRows');
+    giftRows.innerHTML = model.gifts.map((gift, idx) => `
+      <div class="row-card inline-fields--wide">
+        <input class="text-input" data-gift-name="${idx}" value="${escapeHtml(gift.name)}">
+        <input class="text-input" data-gift-category="${idx}" value="${escapeHtml(gift.category)}">
+        <input class="money-input" data-gift-price="${idx}" type="number" min="0" value="${Number(gift.price || 0)}">
+        <button class="assign-btn" data-gift-remove="${idx}">削除</button>
+      </div>
+    `).join('');
+    model.gifts.forEach((gift, idx) => {
+      giftRows.querySelector(`[data-gift-name="${idx}"]`)?.addEventListener('input', (e) => { model.gifts[idx].name = e.target.value; render(); });
+      giftRows.querySelector(`[data-gift-category="${idx}"]`)?.addEventListener('input', (e) => { model.gifts[idx].category = e.target.value; render(); });
+      giftRows.querySelector(`[data-gift-price="${idx}"]`)?.addEventListener('input', (e) => { model.gifts[idx].price = Number(e.target.value || 0); render(); });
+      giftRows.querySelector(`[data-gift-remove="${idx}"]`)?.addEventListener('click', () => { model.gifts.splice(idx, 1); render(); });
+    });
+
+    const assigned = assignment();
+    const categoryCounts = model.gifts.reduce((acc, gift) => {
+      const key = (gift.category || '').trim();
+      if (!key) return acc;
+      acc[key] = (acc[key] || 0) + 1;
+      return acc;
+    }, {});
+    const warnings = [
+      ...Object.entries(categoryCounts).filter(([, count]) => count > 1).map(([category]) => `${category} がかぶりやすいです`),
+      ...assigned.filter((item) => !item.pick).map((item) => `${item.person.name} に割り当てられる候補が不足しています`)
+    ];
+
+    byId('giftAssignmentGrid').innerHTML = assigned.length
+      ? assigned.map((item) => `<div class="assignment-card"><strong>${escapeHtml(item.person.name)}</strong><div class="subline">${escapeHtml(item.person.avoid || '制約なし')}</div><div class="item-card keep"><div class="item-title">${escapeHtml(item.pick ? item.pick.name : '未割り当て')}</div><div class="subline">${escapeHtml(item.pick ? `${item.pick.category} / ¥${Number(item.pick.price).toLocaleString()}` : '候補を足すと担当が埋まります')}</div></div></div>`).join('')
+      : '<div class="empty-state">参加者を足すと担当割り当てが出ます。</div>';
+    byId('giftWarningList').innerHTML = warnings.length
+      ? warnings.map((item) => `<div class="warning-card"><strong>${escapeHtml(item)}</strong></div>`).join('')
+      : '<div class="empty-state">大きなかぶり警告はありません。</div>';
+
+    setHeroStat(`${assigned.filter((item) => item.pick).length}/${assigned.length || 0}`);
+    setStatusCards([
+      { label: '担当あり', value: `${assigned.filter((item) => item.pick).length}人` },
+      { label: 'かぶり警告', value: `${Object.values(categoryCounts).filter((count) => count > 1).length}件` },
+      { label: '未割り当て', value: `${assigned.filter((item) => !item.pick).length}人` }
+    ]);
+    setResultLead(assigned.length ? '誰が何を持つかまで一画面で見えるので、LINEで往復するより早くまとまります。' : '参加者と候補を足すと、担当割り当てがここに出ます。');
+  }
+
+  byId('addGiftPersonBtn').addEventListener('click', () => {
+    const name = (byId('newGiftPersonName').value || '').trim();
+    if (!name) return;
+    model.people.push({ name, avoid: byId('newGiftPersonAvoid').value || '' });
+    byId('newGiftPersonName').value = '';
+    byId('newGiftPersonAvoid').value = '';
+    render();
+  });
+  byId('addGiftItemBtn').addEventListener('click', () => {
+    const name = (byId('newGiftName').value || '').trim();
+    const category = (byId('newGiftCategory').value || '').trim();
+    if (!name || !category) return;
+    model.gifts.push({ name, category, price: Number(byId('newGiftPrice').value || 0) });
+    ['newGiftName', 'newGiftCategory'].forEach((id) => { byId(id).value = ''; });
+    byId('newGiftPrice').value = '1500';
+    render();
+  });
+
+  mountPresetButtons([{ label: '3人の手土産', action: () => { model = clone(presets['3人の手土産']); render(); } }]);
+  state.helpers.runBriefSample = () => { model = clone(presets['3人の手土産']); render(); };
+  render();
+}
+
+function setupCashfloor(root) {
+  const presets = {
+    '給料日前': {
+      start: 58000,
+      rows: [
+        { date: '04/27', label: '家賃', type: 'debit', amount: 62000 },
+        { date: '04/28', label: 'サブスク', type: 'debit', amount: 4800 },
+        { date: '04/30', label: '給与', type: 'income', amount: 180000 },
+        { date: '05/02', label: 'カード引落', type: 'debit', amount: 54000 }
+      ]
+    }
+  };
+  let model = clone(presets['給料日前']);
+
+  root.querySelector('#briefInputZone').innerHTML = `
+    <div class="inline-fields">
+      <input id="cashStart" class="money-input" type="number" min="0" value="58000">
+      <div class="subline">いまの残高</div>
+      <span></span>
+    </div>
+    <div class="row-stack" id="cashRows"></div>
+    <div class="inline-fields--wide">
+      <input id="newCashDate" class="text-input" placeholder="日付 04/29">
+      <input id="newCashLabel" class="text-input" placeholder="予定名">
+      <input id="newCashAmount" class="money-input" type="number" min="0" value="10000">
+      <button id="addCashDebitBtn" class="secondary-btn">引落を追加</button>
+    </div>
+  `;
+  root.querySelector('#briefResultZone').innerHTML = `
+    <div class="timeline-list" id="cashTimeline"></div>
+  `;
+  setResultHint('金額を書き換えると、危ない日だけが赤く沈んで見えるようになります。');
+
+  function parseRows() {
+    return model.rows
+      .map((row) => ({ ...row, amount: Number(row.amount || 0) }))
+      .filter((row) => (row.label || '').trim() && (row.date || '').trim());
+  }
+
+  function render() {
+    byId('cashStart').value = model.start;
+    const rowsWrap = byId('cashRows');
+    rowsWrap.innerHTML = model.rows.map((row, idx) => `
+      <div class="row-card inline-fields--wide">
+        <input class="text-input" data-cash-date="${idx}" value="${escapeHtml(row.date)}">
+        <input class="text-input" data-cash-label="${idx}" value="${escapeHtml(row.label)}">
+        <input class="money-input" data-cash-amount="${idx}" type="number" min="0" value="${Number(row.amount || 0)}">
+        <button class="assign-btn" data-cash-toggle="${idx}">${row.type === 'income' ? '入金' : '引落'}</button>
+      </div>
+    `).join('');
+    model.rows.forEach((row, idx) => {
+      rowsWrap.querySelector(`[data-cash-date="${idx}"]`)?.addEventListener('input', (e) => { model.rows[idx].date = e.target.value; render(); });
+      rowsWrap.querySelector(`[data-cash-label="${idx}"]`)?.addEventListener('input', (e) => { model.rows[idx].label = e.target.value; render(); });
+      rowsWrap.querySelector(`[data-cash-amount="${idx}"]`)?.addEventListener('input', (e) => { model.rows[idx].amount = Number(e.target.value || 0); render(); });
+      rowsWrap.querySelector(`[data-cash-toggle="${idx}"]`)?.addEventListener('click', () => {
+        model.rows[idx].type = model.rows[idx].type === 'income' ? 'debit' : 'income';
+        render();
+      });
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'assign-btn';
+      removeBtn.textContent = '削除';
+      removeBtn.addEventListener('click', () => {
+        model.rows.splice(idx, 1);
+        render();
+      });
+      rowsWrap.querySelector(`[data-cash-toggle="${idx}"]`)?.after(removeBtn);
+    });
+
+    let balance = Number(model.start || 0);
+    const timeline = parseRows().map((row) => {
+      balance += row.type === 'income' ? row.amount : -row.amount;
+      return { ...row, balance };
+    });
+    const minBalance = timeline.reduce((min, row) => Math.min(min, row.balance), Number(model.start || 0));
+    const riskDays = timeline.filter((row) => row.balance < 0);
+    byId('cashTimeline').innerHTML = timeline.length
+      ? timeline.map((row) => {
+          const ratio = Math.max(0, Math.min(100, ((row.balance + 50000) / 230000) * 100));
+          return `<div class="timeline-card ${row.balance < 0 ? 'risk' : ''}">
+            <div><strong>${escapeHtml(row.date)} ${escapeHtml(row.label)}</strong><div class="subline">${row.type === 'income' ? '+' : '-'}¥${row.amount.toLocaleString()}</div></div>
+            <div class="timeline-bar"><span style="width:${ratio}%"></span></div>
+            <div class="subline">残高 ¥${row.balance.toLocaleString()}</div>
+          </div>`;
+        }).join('')
+      : '<div class="empty-state">入出金予定を足すと、危ない日がここに出ます。</div>';
+
+    setHeroStat(riskDays[0] ? riskDays[0].date : '安全');
+    setStatusCards([
+      { label: '危ない日', value: `${riskDays.length}日` },
+      { label: '最低残高', value: `¥${minBalance.toLocaleString()}` },
+      { label: '入出金予定', value: `${timeline.length}件` }
+    ]);
+    setResultLead(riskDays.length ? '危ない日だけが赤く残るので、通帳のスクショを見比べるより注意日が早く見えます。' : 'いまの予定なら、給料日前まで大きく沈む日はありません。');
+  }
+
+  byId('cashStart').addEventListener('input', (e) => { model.start = Number(e.target.value || 0); render(); });
+  byId('addCashDebitBtn').addEventListener('click', () => {
+    const date = (byId('newCashDate').value || '').trim();
+    const label = (byId('newCashLabel').value || '').trim();
+    if (!date || !label) return;
+    model.rows.push({ date, label, type: 'debit', amount: Number(byId('newCashAmount').value || 0) });
+    ['newCashDate', 'newCashLabel'].forEach((id) => { byId(id).value = ''; });
+    byId('newCashAmount').value = '10000';
+    render();
+  });
+
+  mountPresetButtons([{ label: '給料日前', action: () => { model = clone(presets['給料日前']); render(); } }]);
+  state.helpers.runBriefSample = () => { model = clone(presets['給料日前']); render(); };
+  render();
+}
+
+function setupTempSpace(root) {
+  const presets = {
+    '掃除中の部屋': {
+      zones: [
+        { name: '窓際', capacity: 12, walkway: 4 },
+        { name: '机横', capacity: 8, walkway: 3 },
+        { name: '廊下前', capacity: 10, walkway: 6 }
+      ],
+      items: [
+        { name: '段ボールA', size: 3, zone: '窓際' },
+        { name: '段ボールB', size: 4, zone: '窓際' },
+        { name: '折りたたみ椅子', size: 2, zone: '机横' },
+        { name: '本の束', size: 3, zone: '廊下前' }
+      ]
+    }
+  };
+  let model = clone(presets['掃除中の部屋']);
+
+  root.querySelector('#briefInputZone').innerHTML = `
+    <div class="row-stack" id="zoneRows"></div>
+    <div class="inline-fields--wide">
+      <input id="newZoneName" class="text-input" placeholder="ゾーン名">
+      <input id="newZoneCapacity" class="money-input" type="number" min="1" value="8">
+      <input id="newZoneWalkway" class="money-input" type="number" min="0" value="3">
+      <button id="addZoneBtn" class="secondary-btn">ゾーンを追加</button>
+    </div>
+    <div class="row-stack" id="spaceItemRows"></div>
+    <div class="inline-fields--wide">
+      <input id="newSpaceItemName" class="text-input" placeholder="荷物名">
+      <input id="newSpaceItemSize" class="money-input" type="number" min="1" value="2">
+      <input id="newSpaceItemZone" class="text-input" placeholder="置きたいゾーン名">
+      <button id="addSpaceItemBtn" class="secondary-btn">荷物を追加</button>
+    </div>
+  `;
+  root.querySelector('#briefResultZone').innerHTML = `
+    <div class="zone-grid" id="spaceZoneGrid"></div>
+    <div class="warning-list" id="spaceWarnings"></div>
+  `;
+  setResultHint('荷物のサイズや置き場所を変えると、通路余白が足りないゾーンだけが警告されます。');
+
+  function render() {
+    const zoneRows = byId('zoneRows');
+    zoneRows.innerHTML = model.zones.map((zone, idx) => `
+      <div class="row-card inline-fields--wide">
+        <input class="text-input" data-zone-name="${idx}" value="${escapeHtml(zone.name)}">
+        <input class="money-input" data-zone-capacity="${idx}" type="number" min="1" value="${Number(zone.capacity || 0)}">
+        <input class="money-input" data-zone-walkway="${idx}" type="number" min="0" value="${Number(zone.walkway || 0)}">
+        <button class="assign-btn" data-zone-remove="${idx}">削除</button>
+      </div>
+    `).join('');
+    model.zones.forEach((zone, idx) => {
+      zoneRows.querySelector(`[data-zone-name="${idx}"]`)?.addEventListener('input', (e) => { model.zones[idx].name = e.target.value; render(); });
+      zoneRows.querySelector(`[data-zone-capacity="${idx}"]`)?.addEventListener('input', (e) => { model.zones[idx].capacity = Number(e.target.value || 0); render(); });
+      zoneRows.querySelector(`[data-zone-walkway="${idx}"]`)?.addEventListener('input', (e) => { model.zones[idx].walkway = Number(e.target.value || 0); render(); });
+      zoneRows.querySelector(`[data-zone-remove="${idx}"]`)?.addEventListener('click', () => { model.zones.splice(idx, 1); render(); });
+    });
+
+    const itemRows = byId('spaceItemRows');
+    itemRows.innerHTML = model.items.map((item, idx) => `
+      <div class="row-card inline-fields--wide">
+        <input class="text-input" data-space-name="${idx}" value="${escapeHtml(item.name)}">
+        <input class="money-input" data-space-size="${idx}" type="number" min="1" value="${Number(item.size || 0)}">
+        <input class="text-input" data-space-zone="${idx}" value="${escapeHtml(item.zone || '')}">
+        <button class="assign-btn" data-space-remove="${idx}">削除</button>
+      </div>
+    `).join('');
+    model.items.forEach((item, idx) => {
+      itemRows.querySelector(`[data-space-name="${idx}"]`)?.addEventListener('input', (e) => { model.items[idx].name = e.target.value; render(); });
+      itemRows.querySelector(`[data-space-size="${idx}"]`)?.addEventListener('input', (e) => { model.items[idx].size = Number(e.target.value || 0); render(); });
+      itemRows.querySelector(`[data-space-zone="${idx}"]`)?.addEventListener('input', (e) => { model.items[idx].zone = e.target.value; render(); });
+      itemRows.querySelector(`[data-space-remove="${idx}"]`)?.addEventListener('click', () => { model.items.splice(idx, 1); render(); });
+    });
+
+    const zoneCards = model.zones.map((zone) => {
+      const items = model.items.filter((item) => (item.zone || '').trim() === zone.name);
+      const used = items.reduce((sum, item) => sum + Number(item.size || 0), 0);
+      const freeWalkway = Number(zone.capacity || 0) - used;
+      const warn = freeWalkway < Number(zone.walkway || 0);
+      return { zone, items, used, freeWalkway, warn };
+    });
+    byId('spaceZoneGrid').innerHTML = zoneCards.length
+      ? zoneCards.map(({ zone, items, used, freeWalkway, warn }) => `<div class="zone-card ${warn ? 'warn' : ''}"><strong>${escapeHtml(zone.name)}</strong><div class="zone-meters"><div class="subline">容量 ${zone.capacity} / 使用 ${used}</div><div class="timeline-bar"><span style="width:${Math.min(100, (used / Math.max(1, zone.capacity)) * 100)}%"></span></div><div class="subline">通路余白 ${freeWalkway}${warn ? ' / <strong>警告</strong>' : ''}</div></div><div class="tag-row">${items.length ? items.map((item) => `<span class="preview-token">${escapeHtml(item.name)} ${item.size}</span>`).join('') : '<span class="subline">まだ空きがあります</span>'}</div></div>`).join('')
+      : '<div class="empty-state">ゾーンを足すと、仮置き先の安全さがここに出ます。</div>';
+    const warnings = zoneCards.filter((item) => item.warn).map((item) => `${item.zone.name} は通路余白が ${item.freeWalkway} で足りません`);
+    const unplaced = model.items.filter((item) => !model.zones.some((zone) => zone.name === (item.zone || '').trim())).map((item) => item.name);
+    if (unplaced.length) warnings.push(`未配置: ${unplaced.join(' / ')}`);
+    byId('spaceWarnings').innerHTML = warnings.length
+      ? warnings.map((item) => `<div class="warning-card"><strong>${escapeHtml(item)}</strong></div>`).join('')
+      : '<div class="empty-state">通路を塞ぐ警告はありません。</div>';
+
+    setHeroStat(`${zoneCards.filter((item) => !item.warn).length}/${zoneCards.length || 0}`);
+    setStatusCards([
+      { label: '安全ゾーン', value: `${zoneCards.filter((item) => !item.warn).length}つ` },
+      { label: '警告', value: `${zoneCards.filter((item) => item.warn).length}つ` },
+      { label: '未配置', value: `${unplaced.length}点` }
+    ]);
+    setResultLead(zoneCards.length ? '通路余白が足りない所だけが警告されるので、床置きしてから困る前に直せます。' : 'ゾーンと荷物を足すと、通れる配置がここで見えます。');
+  }
+
+  byId('addZoneBtn').addEventListener('click', () => {
+    const name = (byId('newZoneName').value || '').trim();
+    if (!name) return;
+    model.zones.push({
+      name,
+      capacity: Number(byId('newZoneCapacity').value || 0),
+      walkway: Number(byId('newZoneWalkway').value || 0)
+    });
+    ['newZoneName'].forEach((id) => { byId(id).value = ''; });
+    byId('newZoneCapacity').value = '8';
+    byId('newZoneWalkway').value = '3';
+    render();
+  });
+  byId('addSpaceItemBtn').addEventListener('click', () => {
+    const name = (byId('newSpaceItemName').value || '').trim();
+    if (!name) return;
+    model.items.push({
+      name,
+      size: Number(byId('newSpaceItemSize').value || 0),
+      zone: byId('newSpaceItemZone').value || ''
+    });
+    ['newSpaceItemName', 'newSpaceItemZone'].forEach((id) => { byId(id).value = ''; });
+    byId('newSpaceItemSize').value = '2';
+    render();
+  });
+
+  mountPresetButtons([{ label: '掃除中の部屋', action: () => { model = clone(presets['掃除中の部屋']); render(); } }]);
+  state.helpers.runBriefSample = () => { model = clone(presets['掃除中の部屋']); render(); };
   render();
 }
 

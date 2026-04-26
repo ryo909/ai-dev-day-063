@@ -31,6 +31,13 @@
 .first-view--budget{--fv-shell-start:#fff1ec;--fv-shell-end:#fffdf8;--fv-accent:#ff6b57;--fv-accent-2:#ff9f43;--fv-soft:#fff1ec}
 .first-view--filter{--fv-shell-start:#f6f9ff;--fv-shell-end:#ffffff;--fv-accent:#2f6fed;--fv-accent-2:#6cb8ff;--fv-soft:#edf4ff}
 .first-view--route{--fv-shell-start:#102038;--fv-shell-end:#1f3858;--fv-card:rgba(255,255,255,.08);--fv-line:rgba(255,255,255,.12);--fv-ink:#f5fbff;--fv-muted:rgba(245,251,255,.78);--fv-accent:#5dd6ff;--fv-accent-2:#00a8cc;--fv-soft:rgba(93,214,255,.14)}
+.first-view--expiry{--fv-shell-start:#fff7eb;--fv-shell-end:#fffdf8;--fv-accent:#e86f2c;--fv-accent-2:#f6b73c;--fv-soft:#fff2dd}
+.first-view--quote{--fv-shell-start:#eef4ff;--fv-shell-end:#ffffff;--fv-accent:#2457ff;--fv-accent-2:#4aa3ff;--fv-soft:#e9f1ff}
+.first-view--message{--fv-shell-start:#fff1f1;--fv-shell-end:#fff9f6;--fv-accent:#d8576b;--fv-accent-2:#ff9a62;--fv-soft:#fff0eb}
+.first-view--chore{--fv-shell-start:#eefbf4;--fv-shell-end:#fffef8;--fv-accent:#2f8f5b;--fv-accent-2:#7cc96d;--fv-soft:#edf9ef}
+.first-view--gift{--fv-shell-start:#fff3f7;--fv-shell-end:#fffdfc;--fv-accent:#d94f7a;--fv-accent-2:#ff9e6d;--fv-soft:#fff0f4}
+.first-view--cashflow{--fv-shell-start:#fff2ef;--fv-shell-end:#fffdf8;--fv-accent:#d85745;--fv-accent-2:#ffb366;--fv-soft:#fff1e8}
+.first-view--layout{--fv-shell-start:#f2f5e8;--fv-shell-end:#fffdf8;--fv-accent:#5d7c2d;--fv-accent-2:#9fb33d;--fv-soft:#f3f7e9}
 .first-view--route .intro-link{color:#8ddcff}
 .first-view--route .fv-pair{background:rgba(255,255,255,.08)}
 .empty-state{padding:14px;border-radius:12px;background:rgba(148,163,184,.12);line-height:1.7}
@@ -38,11 +45,11 @@
   .first-view__grid{grid-template-columns:1fr}
 }
 </style><link rel="stylesheet" href="/src/style.css"></head>
-<body><div id="app" data-ui-variant="generic" data-primary-layout="two_column_workbench"><section class="first-view first-view--generic" data-ready-role="first-view">
+<body><div id="app" data-ui-variant="cashflow" data-primary-layout="starting_balance_with_risk_timeline"><section class="first-view first-view--cashflow" data-ready-role="first-view">
   <div class="first-view__top">
     <div>
       <div class="mini-label">Day063</div>
-      <p class="first-view__eyebrow">neutral slate / white</p>
+      <p class="first-view__eyebrow">残高アラートレッド</p>
     </div>
     <a class="intro-link" href="https://github.com/ryo909/ai-dev-day-063" target="_blank" rel="noopener">GitHub</a>
   </div>
@@ -59,28 +66,28 @@
     </article>
     <article class="fv-block fv-block--start" data-ready-role="start-block">
       <p class="fv-kicker">最初にやること</p>
-      <h2>まず試す入力</h2>
+      <h2>残高と予定を足す</h2>
       <dl class="fv-pair">
         <dt>入力 / 操作</dt>
         <dd>入力</dd>
       </dl>
       <dl class="fv-pair">
         <dt>サンプル値</dt>
-        <dd>ここに入力...</dd>
+        <dd>残高 58,000円 / 家賃 -62,000円 / 給与 +180,000円</dd>
       </dl>
       <p class="fv-helper">入出金予定を入れると、不足予兆つきの残高推移が分かります。</p>
-      <button id="sampleFillBtn" data-ready-role="primary-cta" class="primary-intro-btn" style="background:linear-gradient(135deg,var(--fv-accent),var(--fv-accent-2))">サンプルで試す</button>
+      <button id="sampleFillBtn" data-ready-role="primary-cta" class="primary-intro-btn" style="background:linear-gradient(135deg,var(--fv-accent),var(--fv-accent-2))">給料日前の残高で試す</button>
       <p class="fv-inline-note">初見なら「例で試す」から始めると、そのまま結果見本まで確認できます。</p>
     </article>
     <article class="fv-block fv-block--preview" data-ready-role="output-preview">
       <p class="fv-kicker">押すと返るもの</p>
       <h2>ここを見ればOKです</h2>
-      <p class="fv-preview-copy">押すと返るものの主役を、入力前から見本で確認できます。</p>
-      <div class="fv-preview-tokens"><span class="preview-token">使う場面が分かる</span><span class="preview-token">最初の一手が見える</span><span class="preview-token">返る結果が先に分かる</span></div>
+      <p class="fv-preview-copy">危ない日だけが赤く沈むので、通帳を見比べるより先に注意日が分かります。</p>
+      <div class="fv-preview-tokens"><span class="preview-token">残高タイムライン</span><span class="preview-token">危ない日</span><span class="preview-token">改善候補</span></div>
       <div class="fv-preview-card">
-        <span>返る結果の見本</span>
-        <strong>ここを見ればOKです</strong>
+        <span>返る結果</span>
+        <strong>危ない日 2日 / 最低残高 -4,000円 / 先に減らす候補 1件</strong>
       </div>
     </article>
   </div>
-</section><div class="grid"><section class="panel"><h2>入れるもの</h2><input id="tokenInput" placeholder="ここに入力..."><button id="addTokenBtn">追加する</button><div id="tokenList" class="tokens"></div><hr><button id="drawBtn">引いてみる</button><button id="lockBtn">固定を切り替える</button></section><section class="panel"><h2>ここを見ればOKです</h2><div id="cardStack" class="cards"><div class="empty-state">まだ結果がありません。項目を入れるか、サンプルで試せます。</div></div><h3>さっき出た組み合わせ</h3><ul id="historyList"><li>まだ履歴がありません</li></ul></section></div></div><script type="module" src="/src/main.js"></script></body></html>
+</section><section class="brief-canvas brief-canvas--cashflow"><div id="briefCanvas"></div></section></div><script type="module" src="/src/main.js"></script></body></html>
